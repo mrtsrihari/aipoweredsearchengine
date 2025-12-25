@@ -13,7 +13,7 @@ def main():
         if 'id' not in doc:
             doc['id'] = f"doc_{idx}"
 
-    # Initialize search engine
+    #  search engine
     search_engine = SemanticSearchEngine()
 
     # Index documents
