@@ -6,6 +6,7 @@ This is an AI-powered search engine using embeddings and vector search.
 
 1. Install requirements: `pip install -r requirements.txt`
 
+
 ## Usage
 
 1. Run indexing: `python run_indexing.py`
