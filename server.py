@@ -11,7 +11,7 @@ import sys
 os.environ['TORCH_COMPILE_DEBUG'] = '0'
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
-# Add project root to path
+# Add root to path
 project_root = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, project_root)
 
