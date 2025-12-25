@@ -6,7 +6,7 @@ import os
 project_root = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, project_root)
 
-# Now import and run the Flask app
+# Now import and run Flask app
 from src.api.app import app
 
 if __name__ == '__main__':
