@@ -3,11 +3,11 @@
 import os
 import sys
 
-# Disable torch compilation issues
+# Disable torch 
 os.environ['TORCH_COMPILE_DEBUG'] = '0'
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
-# Add the project root to the Python path
+# Add the project the Python path
 project_root = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, project_root)
 
