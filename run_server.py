@@ -25,6 +25,7 @@ print("  GET /health           - Health check")
 print("  GET /search?q=<query> - Search documents")
 print("-" * 70 + "\n")
 
+
 app.config['JSON_SORT_KEYS'] = False
 
 if __name__ == '__main__':
