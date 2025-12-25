@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>AI Search Engine</title>
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{
+font-family:system-ui,Segoe UI,Arial;
+background:linear-gradient(135deg,#667eea,#764ba2);
+min-height:100vh;
+display:flex;
+justify-content:center;
+align-items:center;
+padding:20px
+}
+.container{
+background:#fff;
+border-radius:12px;
+max-width:700px;
+width:100%;
+padding:40px;
+box-shadow:0 20px 60px rgba(0,0,0,.3)
+}
+.header{text-align:center;margin-bottom:30px}
+h1{font-size:32px;margin-bottom:6px}
+.subtitle{color:#666;font-size:14px}
+.search-box{display:flex;gap:10px;margin-bottom:20px}
+#query{
+flex:1;
+padding:14px;
+font-size:16px;
+border:2px solid #e0e0e0;
+border-radius:8px
+}
+#query:focus{outline:none;border-color:#667eea}
+#searchBtn{
+padding:14px 30px;
+border:none;
+border-radius:8px;
+background:#667eea;
+color:#fff;
+font-weight:600;
+cursor:pointer
+}
+.loading{text-align:center;color:#667eea;display:none;margin:15px 0}
+.loading.show{display:block}
+#error{
+background:#fee;
+border:1px solid #fcc;
+color:#c33;
+padding:12px;
+border-radius:8px;
+display:none;
+margin-bottom:15px
+}
+#results{margin-top:20px}
+.result-item{
+background:#f9f9f9;
+border:1px solid #e0e0e0;
+border-radius:8px;
+padding:16px;
+margin-bottom:12px
+}
+.result-score{
+display:inline-block;
+background:#667eea;
+color:#fff;
+padding:4px 8px;
+border-radius:4px;
+font-size:12px;
+margin-bottom:6px
+}
+.result-content{font-size:14px;line-height:1.5}
+.empty{text-align:center;color:#999;padding:30px}
+</style>
+</head>
+
+<body>
+<div class="container">
+<div class="header">
+<h1>🔍 AI Search</h1>
+<p class="subtitle">Semantic search powered by AI embeddings</p>
+</div>
+
+<div class="search-box">
+<input id="query" placeholder="Enter your search query…" />
+<button id="searchBtn">Search</button>
+</div>
+
+<div id="error"></div>
+<div id="loading" class="loading">Searching…</div>
+<div id="results" class="empty">Start searching to see results</div>
+</div>
+
+<script>
+const API_BASE = "http://127.0.0.1:5000";
+const searchBtn = document.getElementById("searchBtn");
+const queryInput = document.getElementById("query");
+const resultsDiv = document.getElementById("results");
+const loadingDiv = document.getElementById("loading");
+const errorDiv = document.getElementById("error");
+
+// 🔥 Trigger backend initialization on load
+fetch(`${API_BASE}/health`);
+
+searchBtn.onclick = search;
+queryInput.onkeypress = e => { if(e.key==="Enter") search(); };
+
+async function search(){
+const q = queryInput.value.trim();
+if(!q){ showError("Please enter a query"); return; }
+
+hideError();
+resultsDiv.innerHTML="";
+loadingDiv.classList.add("show");
+
+try{
+const res = await fetch(`${API_BASE}/search?q=${encodeURIComponent(q)}`);
+const data = await res.json();
+if(!res.ok) throw new Error(data.error);
+
+if(data.length===0){
+resultsDiv.innerHTML = `<div class="empty">No results found</div>`;
+}else{
+resultsDiv.innerHTML = data.map(r=>`
+<div class="result-item">
+<div class="result-score">Score ${(r.score*100).toFixed(1)}%</div>
+<div class="result-content">
+<strong>${r.document.title||"Untitled"}</strong>
+<p>${r.document.content}</p>
+</div>
+</div>
+`).join("");
+}
+}catch(err){
+showError(err.message);
+}finally{
+loadingDiv.classList.remove("show");
+}
+}
+
+function showError(msg){
+errorDiv.textContent = msg;
+errorDiv.style.display="block";
+}
+
+function hideError(){
+errorDiv.style.display="none";
+}
+</script>
+</body>
+</html>

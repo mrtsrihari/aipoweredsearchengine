@@ -69,7 +69,12 @@ class TextEmbedder:
             
             # Load the pre-trained sentence transformer model
             # This automatically downloads and caches the model on first use
-            self.pretrained_model_instance = SentenceTransformer(model_identifier)
+            # Disable model card loading to avoid network issues
+            self.pretrained_model_instance = SentenceTransformer(
+                model_identifier,
+                trust_remote_code=True,
+                device='cpu'
+            )
             
             # Determine embedding dimensionality by encoding a test string
             # This is more reliable than hardcoding dimensions

@@ -10,7 +10,7 @@ efficient similarity-based retrieval through vector search.
 """
 
 from src.embeddings.embedder import TextEmbedder
-from src.index.vector_store import VectorStore
+from src.index.vector_store import VectorDatabase as VectorStore
 import numpy as np
 from typing import List, Dict, Tuple, Optional, Any
 import logging
@@ -109,7 +109,7 @@ class SemanticSearchEngine:
         
         # Initialize vector store for efficient similarity search
         embedding_dim = self.embedder.get_embedding_dimension()
-        self.vector_store = vector_store or VectorStore(dim=embedding_dim)
+        self.vector_store = vector_store or VectorStore(embedding_dimension=embedding_dim)
         
         # Dictionary to store original documents by ID for result reconstruction
         self.documents: Dict[str, Dict[str, Any]] = {}
@@ -186,7 +186,7 @@ class SemanticSearchEngine:
         
         # Add embeddings to vector store
         logger.info("Adding embeddings to vector index...")
-        self.vector_store.add(embeddings)
+        self.vector_store.add_vectors(embeddings, [{'id': doc_id} for doc_id in doc_ids])
         
         self.is_indexed = True
         logger.info(f"Successfully indexed {len(doc_ids)} documents")
@@ -242,33 +242,30 @@ class SemanticSearchEngine:
         query_embedding = self.embedder.embed(query)
         
         # Search for nearest neighbors in vector space
-        # Returns distances and indices
-        distances, indices = self.vector_store.search(
+        # Returns similarity scores and indices
+        similarity_scores, indices = self.vector_store.search(
             query_embedding, 
-            k=k
+            top_k=k,
+            return_distances=True
         )
         
         # Reconstruct results with metadata
         results = []
         doc_ids_list = list(self.documents.keys())
         
-        for rank, (distance, idx) in enumerate(zip(distances[0], indices[0]), 1):
+        for rank, (score, idx) in enumerate(zip(similarity_scores[0], indices[0]), 1):
             # Validate index is within bounds
             if idx >= len(doc_ids_list):
                 logger.warning(f"Index {idx} out of bounds, skipping result")
                 continue
             
-            doc_id = doc_ids_list[idx]
+            doc_id = doc_ids_list[int(idx)]
             document = self.documents[doc_id]
-            
-            # Convert distance to similarity score (0-1 range)
-            # For L2 distance: similarity ≈ 1 / (1 + distance)
-            similarity_score = self._distance_to_similarity(float(distance))
             
             result = SearchResult(
                 doc_id=doc_id,
                 document=document,
-                score=similarity_score,
+                score=float(score),
                 rank=rank
             )
             results.append(result)

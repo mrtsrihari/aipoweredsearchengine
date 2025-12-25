@@ -1,5 +1,6 @@
 sentence-transformers
 faiss-cpu
 flask
+flask-cors
 numpy
 pandas
